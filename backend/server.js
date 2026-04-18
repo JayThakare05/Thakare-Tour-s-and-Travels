@@ -20,17 +20,17 @@ app.get('/api/health', (req, res) => {
 });
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => {
-    console.log('✅ MongoDB connected');
-    app.listen(PORT, () => {
-      console.log(`🚀 Thakare Tours server running on http://localhost:${PORT}`);
-    });
-  })
-  .catch(err => {
-    console.error('❌ MongoDB connection error:', err.message);
-    // Start server anyway for testing
-    app.listen(PORT, () => {
-      console.log(`⚠️  Server running WITHOUT DB on http://localhost:${PORT}`);
-    });
+mongoose.connect(process.env.MONGODB_ATLAS_URI)
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch(err => console.error('❌ MongoDB error:', err.message));
+
+// Start server only in local development (not on Vercel)
+if (process.env.VERCEL !== '1') {
+  app.listen(PORT, () => {
+    console.log(`🚀 Thakare Tours server running on http://localhost:${PORT}`);
   });
+}
+
+// Export for Vercel serverless
+module.exports = app;
+

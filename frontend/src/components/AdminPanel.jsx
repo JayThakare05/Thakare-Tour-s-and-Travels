@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Trash2, RefreshCw, CheckCircle, XCircle, ChevronDown, Car } from 'lucide-react';
 import axios from 'axios';
 
-const API = 'http://localhost:5000/api';
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const STATUS_COLORS = {
   pending: 'bg-yellow-100 text-yellow-700',

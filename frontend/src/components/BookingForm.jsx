@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import axios from 'axios';
 
-const API = 'http://localhost:5000/api';
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const CARS_LIST = [
   { value: '', labelEn: 'Any Available', labelMr: 'कोणतीही उपलब्ध' },
   { value: 'Toyota Innova', labelEn: 'Toyota Innova (₹18/km)', labelMr: 'टोयोटा इनोवा (₹18/किमी)' },
