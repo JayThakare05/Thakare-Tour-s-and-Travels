@@ -1,0 +1,116 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Poppins', 'Noto Sans Devanagari', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: #fff8f0;
+    color: #1a1a1a;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #fff8f0;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #FF6A00;
+    border-radius: 3px;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-gradient-to-r from-saffron-500 to-saffron-400 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-saffron-500/30 hover:scale-105 transition-all duration-300 active:scale-95;
+  }
+  .btn-outline {
+    @apply border-2 border-saffron-500 text-saffron-500 font-semibold py-3 px-6 rounded-xl hover:bg-saffron-500 hover:text-white transition-all duration-300;
+  }
+  .card {
+    @apply bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden;
+  }
+  .section-title {
+    @apply text-3xl md:text-4xl font-bold text-center mb-4;
+  }
+  .section-subtitle {
+    @apply text-gray-500 text-center mb-12 text-lg;
+  }
+  .badge-available {
+    @apply bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full;
+  }
+  .badge-unavailable {
+    @apply bg-red-100 text-red-600 text-xs font-semibold px-3 py-1 rounded-full;
+  }
+  .input-field {
+    @apply w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-saffron-500 transition-colors duration-200 bg-white;
+  }
+  .nav-link {
+    @apply text-white/90 hover:text-white font-medium transition-colors duration-200 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-white after:transition-all after:duration-300 hover:after:w-full;
+  }
+}
+
+/* Devanagari font helper */
+.font-marathi {
+  font-family: 'Noto Sans Devanagari', sans-serif;
+}
+
+/* Hero pattern overlay */
+.hero-pattern {
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(255, 179, 71, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 106, 0, 0.10) 0%, transparent 50%);
+}
+
+/* Glass morphism */
+.glass {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Shimmer loading effect */
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+.shimmer {
+  background: linear-gradient(to right, #f0f0f0 8%, #e0e0e0 18%, #f0f0f0 33%);
+  background-size: 1000px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Sticky WhatsApp button */
+.sticky-whatsapp {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Car card hover animation */
+.car-card:hover .car-image {
+  transform: scale(1.05) translateY(-4px);
+}
+.car-image {
+  transition: transform 0.4s ease;
+}
+
+/* Status dot pulse */
+.status-dot-available {
+  animation: pulseGreen 2s ease-in-out infinite;
+}
+@keyframes pulseGreen {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+}

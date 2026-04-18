@@ -1,0 +1,47 @@
+[
+  {
+    "_id": "innova",
+    "name": "Toyota Innova",
+    "nameMarathi": "टोयोटा इनोवा",
+    "image": "/cars/Innova.jpeg",
+    "pricePerKm": 18,
+    "fuelType": "Diesel",
+    "fuelTypeMarathi": "डिझेल",
+    "capacity": 7,
+    "available": true,
+    "badge": "Premium",
+    "badgeMarathi": "प्रीमियम",
+    "features": ["7 Seater", "AC", "GPS", "Music System"],
+    "featuresMarathi": ["७ सीटर", "एसी", "जीपीएस", "म्युझिक सिस्टम"]
+  },
+  {
+    "_id": "ertiga",
+    "name": "Maruti Ertiga",
+    "nameMarathi": "मारुती एर्टिगा",
+    "image": "/cars/ertiga.jpeg",
+    "pricePerKm": 16,
+    "fuelType": "CNG / Diesel",
+    "fuelTypeMarathi": "सीएनजी / डिझेल",
+    "capacity": 7,
+    "available": true,
+    "badge": "Popular",
+    "badgeMarathi": "लोकप्रिय",
+    "features": ["7 Seater", "AC", "CNG/Diesel", "Music System"],
+    "featuresMarathi": ["७ सीटर", "एसी", "सीएनजी/डिझेल", "म्युझिक सिस्टम"]
+  },
+  {
+    "_id": "eeco",
+    "name": "Maruti Eeco Wagon",
+    "nameMarathi": "मारुती इको वॅगनर",
+    "image": "/cars/echo.jpeg",
+    "pricePerKm": 15,
+    "fuelType": "CNG",
+    "fuelTypeMarathi": "सीएनजी",
+    "capacity": 8,
+    "available": true,
+    "badge": "Budget",
+    "badgeMarathi": "किफायतशीर",
+    "features": ["8 Seater", "AC", "CNG", "Spacious"],
+    "featuresMarathi": ["८ सीटर", "एसी", "सीएनजी", "प्रशस्त"]
+  }
+]

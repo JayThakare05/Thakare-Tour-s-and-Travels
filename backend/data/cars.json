@@ -1,0 +1,53 @@
+[
+  {
+    "id": "innova",
+    "name": "Toyota Innova",
+    "nameMarathi": "टोयोटा इनोवा",
+    "image": "/cars/Innova.jpeg",
+    "pricePerKm": 18,
+    "fuelType": "Diesel",
+    "fuelTypeMarathi": "डिझेल",
+    "capacity": 7,
+    "description": "Premium 7-seater SUV perfect for long journeys and family trips",
+    "descriptionMarathi": "लांब प्रवासासाठी आणि कौटुंबिक सहलींसाठी उत्तम 7-सीटर एसयूव्ही",
+    "features": ["7 Seater", "AC", "Music System", "GPS", "First Aid Kit"],
+    "featuresMarathi": ["७ सीटर", "एसी", "म्युझिक सिस्टम", "जीपीएस", "फर्स्ट एड किट"],
+    "available": true,
+    "badge": "Premium",
+    "badgeMarathi": "प्रीमियम"
+  },
+  {
+    "id": "ertiga",
+    "name": "Maruti Ertiga",
+    "nameMarathi": "मारुती एर्टिगा",
+    "image": "/cars/ertiga.jpeg",
+    "pricePerKm": 16,
+    "fuelType": "CNG / Diesel",
+    "fuelTypeMarathi": "सीएनजी / डिझेल",
+    "capacity": 7,
+    "description": "Versatile 7-seater MPV available in both CNG and Diesel variants",
+    "descriptionMarathi": "सीएनजी आणि डिझेल दोन्ही प्रकारांमध्ये उपलब्ध बहुमुखी 7-सीटर एमपीव्ही",
+    "features": ["7 Seater", "AC", "CNG/Diesel", "Comfortable Seats", "Music System"],
+    "featuresMarathi": ["७ सीटर", "एसी", "सीएनजी/डिझेल", "आरामदायक सीट", "म्युझिक सिस्टम"],
+    "available": true,
+    "badge": "Popular",
+    "badgeMarathi": "लोकप्रिय"
+  },
+  {
+    "id": "eeco",
+    "name": "Maruti Eeco Wagon",
+    "nameMarathi": "मारुती इको वॅगनर",
+    "image": "/cars/echo.jpeg",
+    "pricePerKm": 15,
+    "fuelType": "CNG",
+    "fuelTypeMarathi": "सीएनजी",
+    "capacity": 8,
+    "description": "Budget-friendly 8-seater CNG van, ideal for group travel and local trips",
+    "descriptionMarathi": "समूह प्रवासासाठी किफायतशीर 8-सीटर सीएनजी व्हॅन",
+    "features": ["8 Seater", "AC", "CNG Powered", "Spacious", "Economical"],
+    "featuresMarathi": ["८ सीटर", "एसी", "सीएनजी", "प्रशस्त", "किफायतशीर"],
+    "available": true,
+    "badge": "Budget",
+    "badgeMarathi": "किफायतशीर"
+  }
+]
