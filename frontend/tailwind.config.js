@@ -26,8 +26,8 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Poppins', 'sans-serif'],
-        marathi: ['Noto Sans Devanagari', 'sans-serif'],
+        sans: ['Poppins', 'Mukta', 'sans-serif'],
+        marathi: ['Mukta', 'Poppins', 'sans-serif'],
       },
       backgroundImage: {
         'saffron-gradient': 'linear-gradient(135deg, #FF6A00 0%, #FFB347 100%)',

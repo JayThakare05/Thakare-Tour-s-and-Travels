@@ -9,7 +9,7 @@
   }
 
   body {
-    font-family: 'Poppins', 'Noto Sans Devanagari', sans-serif;
+    font-family: 'Poppins', 'Mukta', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background: #fff8f0;
@@ -60,7 +60,7 @@
 
 /* Devanagari font helper */
 .font-marathi {
-  font-family: 'Noto Sans Devanagari', sans-serif;
+  font-family: 'Mukta', 'Poppins', sans-serif;
 }
 
 /* Hero pattern overlay */
