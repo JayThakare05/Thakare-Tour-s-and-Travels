@@ -13,6 +13,7 @@ app.use(express.json());
 // Routes
 app.use('/api/cars', require('./routes/cars'));
 app.use('/api/bookings', require('./routes/bookings'));
+app.use('/api/upload', require('./routes/upload'));
 
 // Admin login
 app.post('/api/admin/login', (req, res) => {
@@ -35,10 +36,36 @@ app.get('/api/health', (req, res) => {
 
 
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_ATLAS_URI)
-  .then(() => console.log('✅ MongoDB connected'))
-  .catch(err => console.error('❌ MongoDB error:', err.message));
+// MongoDB connection — cached for Vercel serverless (prevents new connection per request)
+let isConnected = false;
+
+async function connectDB() {
+  if (isConnected) return;
+  try {
+    await mongoose.connect(process.env.MONGODB_ATLAS_URI, {
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+    });
+    isConnected = true;
+    console.log('✅ MongoDB connected');
+  } catch (err) {
+    console.error('❌ MongoDB error:', err.message);
+    throw err;
+  }
+}
+
+// Connect on startup (local dev) and attach to requests (Vercel)
+connectDB();
+
+// Middleware to ensure DB is connected on every request (for Vercel cold starts)
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch {
+    res.status(503).json({ error: 'Database unavailable. Please try again.' });
+  }
+});
 
 // Start server only in local development (not on Vercel)
 if (process.env.VERCEL !== '1') {
@@ -49,4 +76,5 @@ if (process.env.VERCEL !== '1') {
 
 // Export for Vercel serverless
 module.exports = app;
+
 

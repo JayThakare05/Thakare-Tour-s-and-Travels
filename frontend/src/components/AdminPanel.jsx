@@ -112,6 +112,10 @@ function CarsTab() {
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({ name: '', nameMarathi: '', image: '', pricePerKm: '', fuelType: '', capacity: 7, available: true });
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
 
   const fetchCars = async () => {
     setLoading(true);
@@ -120,6 +124,30 @@ function CarsTab() {
     finally { setLoading(false); }
   };
   useEffect(() => { fetchCars(); }, []);
+
+  // Handle image file selection → upload immediately to Cloudinary
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+    setUploadError('');
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await axios.post(`${API}/upload`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setForm(p => ({ ...p, image: res.data.url }));
+    } catch {
+      setUploadError('Image upload failed. Please try again.');
+      setImagePreview('');
+      setForm(p => ({ ...p, image: '' }));
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const toggleAvail = async (id) => {
     await axios.patch(`${API}/cars/${id}/availability`);
@@ -130,11 +158,16 @@ function CarsTab() {
   };
   const addCar = async (e) => {
     e.preventDefault();
+    if (!form.image) { setUploadError('Please upload a car image.'); return; }
     await axios.post(`${API}/cars`, { ...form, pricePerKm: Number(form.pricePerKm), capacity: Number(form.capacity) });
     setShowAdd(false);
     setForm({ name: '', nameMarathi: '', image: '', pricePerKm: '', fuelType: '', capacity: 7, available: true });
+    setImageFile(null);
+    setImagePreview('');
+    setUploadError('');
     fetchCars();
   };
+
 
   return (
     <div>
@@ -155,7 +188,6 @@ function CarsTab() {
             {[
               { name: 'name', label: 'Car Name (English)', placeholder: 'e.g. Toyota Innova' },
               { name: 'nameMarathi', label: 'Car Name (Marathi)', placeholder: 'e.g. टोयोटा इनोवा' },
-              { name: 'image', label: 'Image Path/URL', placeholder: '/cars/innova.png' },
               { name: 'pricePerKm', label: 'Price per KM (₹)', placeholder: '18', type: 'number' },
               { name: 'fuelType', label: 'Fuel Type', placeholder: 'Diesel / CNG' },
               { name: 'capacity', label: 'Capacity (seats)', placeholder: '7', type: 'number' },
@@ -165,13 +197,58 @@ function CarsTab() {
                 <input type={f.type || 'text'} placeholder={f.placeholder} value={form[f.name]} onChange={e => setForm(p => ({ ...p, [f.name]: e.target.value }))} required={['name', 'pricePerKm', 'fuelType'].includes(f.name)} className="w-full border-2 border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-saffron-500" />
               </div>
             ))}
+
+            {/* Image Upload */}
+            <div className="sm:col-span-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Car Image</label>
+              <div className="flex items-start gap-4">
+                {/* File picker */}
+                <label className={`flex flex-col items-center justify-center w-40 h-28 border-2 border-dashed rounded-xl cursor-pointer transition-all ${uploading ? 'border-orange-300 bg-orange-50' : 'border-gray-300 bg-white hover:border-saffron-500 hover:bg-orange-50'}`}>
+                  <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" disabled={uploading} />
+                  {uploading ? (
+                    <>
+                      <div className="w-6 h-6 border-2 border-orange-400 border-t-transparent rounded-full animate-spin mb-2" />
+                      <span className="text-xs text-orange-500 font-semibold">Uploading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-2xl mb-1">📷</span>
+                      <span className="text-xs text-gray-500 text-center px-2">Click to upload image</span>
+                      <span className="text-xs text-gray-400 mt-0.5">JPG, PNG, WebP</span>
+                    </>
+                  )}
+                </label>
+
+                {/* Preview */}
+                {imagePreview && (
+                  <div className="relative">
+                    <img src={imagePreview} alt="Preview" className="w-40 h-28 object-cover rounded-xl border-2 border-orange-200" />
+                    {form.image && (
+                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                        <span className="text-white text-xs">✓</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Upload status */}
+              {form.image && !uploading && (
+                <p className="text-xs text-green-600 font-semibold mt-2">✅ Image uploaded to Cloudinary</p>
+              )}
+              {uploadError && (
+                <p className="text-xs text-red-500 font-semibold mt-2">⚠️ {uploadError}</p>
+              )}
+            </div>
           </div>
+
           <div className="flex gap-3 mt-4">
-            <button type="submit" className="bg-gradient-to-r from-saffron-500 to-saffron-400 text-white px-6 py-2 rounded-xl font-semibold text-sm hover:scale-105 transition-all">Save Car</button>
-            <button type="button" onClick={() => setShowAdd(false)} className="bg-gray-200 text-gray-700 px-6 py-2 rounded-xl font-semibold text-sm hover:bg-gray-300 transition-all">Cancel</button>
+            <button type="submit" disabled={uploading} className="bg-gradient-to-r from-saffron-500 to-saffron-400 text-white px-6 py-2 rounded-xl font-semibold text-sm hover:scale-105 transition-all disabled:opacity-60 disabled:cursor-not-allowed">Save Car</button>
+            <button type="button" onClick={() => { setShowAdd(false); setImagePreview(''); setUploadError(''); }} className="bg-gray-200 text-gray-700 px-6 py-2 rounded-xl font-semibold text-sm hover:bg-gray-300 transition-all">Cancel</button>
           </div>
         </form>
       )}
+
 
       {loading ? (
         <div className="text-center py-12 text-gray-400">Loading cars...</div>
