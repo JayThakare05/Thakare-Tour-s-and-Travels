@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Trash2, RefreshCw, CheckCircle, XCircle, ChevronDown, Car } from 'lucide-react';
+import { Plus, Trash2, RefreshCw, CheckCircle, XCircle, Car, Bell } from 'lucide-react';
 import axios from 'axios';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -408,18 +408,58 @@ export default function AdminPanel() {
   );
   const [tab, setTab] = useState('bookings');
   const [bookingCount, setBookingCount] = useState(0);
+  const [newBookingCount, setNewBookingCount] = useState(0); // unseen notifications
+  const [showNotifDrop, setShowNotifDrop] = useState(false);
+  const prevCountRef = useRef(0);
 
   const handleLogout = () => {
     sessionStorage.removeItem('adminAuth');
+    sessionStorage.removeItem('lastSeenBookingCount');
     setAuthenticated(false);
     navigate('/');
   };
 
+  // Poll pending bookings every 30s for notification badge
+  const fetchPendingCount = async () => {
+    try {
+      const r = await axios.get(`${API}/bookings?status=pending`);
+      const count = r.data.total || 0;
+      setBookingCount(count);
+
+      const lastSeen = Number(sessionStorage.getItem('lastSeenBookingCount') || '0');
+      if (count > lastSeen) {
+        setNewBookingCount(count - lastSeen);
+        // Browser notification if tab is in background
+        if (document.hidden && Notification.permission === 'granted') {
+          new Notification('🚘 New Booking Request!', {
+            body: `${count - lastSeen} new booking(s) received — Thakare Tours`,
+            icon: '/favicon.svg',
+          });
+        }
+      } else {
+        setNewBookingCount(0);
+      }
+    } catch {}
+  };
+
   useEffect(() => {
-    if (authenticated) {
-      axios.get(`${API}/bookings?status=pending`).then(r => setBookingCount(r.data.total || 0)).catch(() => {});
+    if (!authenticated) return;
+    // Request notification permission
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
     }
+    fetchPendingCount();
+    const interval = setInterval(fetchPendingCount, 30000);
+    return () => clearInterval(interval);
   }, [authenticated]);
+
+  const handleBellClick = () => {
+    setShowNotifDrop(p => !p);
+    // Mark as seen
+    sessionStorage.setItem('lastSeenBookingCount', String(bookingCount));
+    setNewBookingCount(0);
+    setTab('bookings');
+  };
 
   if (!authenticated) {
     return <AdminLogin onSuccess={() => setAuthenticated(true)} />;
@@ -435,12 +475,43 @@ export default function AdminPanel() {
             <p className="text-gray-400 mt-1">Thakare Tours and Travels — Management Panel</p>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate('/')}
-              className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all"
-            >
-              ← Back to Site
-            </button>
+            {/* Notification Bell */}
+            <div className="relative">
+              <button
+                onClick={handleBellClick}
+                title="Pending booking notifications"
+                className="relative flex items-center justify-center w-10 h-10 bg-gray-700 hover:bg-gray-600 rounded-xl transition-all"
+              >
+                <Bell size={18} className={newBookingCount > 0 ? 'text-yellow-300 animate-bounce' : 'text-white'} />
+                {newBookingCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg animate-pulse">
+                    {newBookingCount > 9 ? '9+' : newBookingCount}
+                  </span>
+                )}
+              </button>
+              {/* Notification Dropdown */}
+              {showNotifDrop && (
+                <div className="absolute right-0 mt-2 w-72 bg-gray-800 border border-white/10 rounded-2xl shadow-2xl z-50 p-4">
+                  <p className="text-white font-semibold text-sm mb-2">📋 Pending Bookings</p>
+                  {bookingCount > 0 ? (
+                    <div className="bg-yellow-500/20 border border-yellow-400/30 rounded-xl px-4 py-3">
+                      <p className="text-yellow-300 font-bold text-lg">{bookingCount}</p>
+                      <p className="text-yellow-200/70 text-xs mt-0.5">booking(s) awaiting response</p>
+                    </div>
+                  ) : (
+                    <p className="text-gray-400 text-sm">✅ No pending bookings</p>
+                  )}
+                  <button
+                    onClick={() => { setShowNotifDrop(false); setTab('bookings'); }}
+                    className="mt-3 w-full text-center text-xs text-orange-400 hover:text-orange-300 font-semibold transition-all"
+                  >
+                    View All Bookings →
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Logout */}
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all"
@@ -469,7 +540,7 @@ export default function AdminPanel() {
             </div>
             <div>
               <p className="text-gray-500 text-sm">Fleet Management</p>
-              <p className="text-lg font-bold text-gray-800">3 Cars Active</p>
+              <p className="text-lg font-bold text-gray-800">Manage Cars</p>
             </div>
           </div>
         </div>
@@ -479,8 +550,17 @@ export default function AdminPanel() {
           <div className="flex border-b border-gray-100">
             {['bookings', 'cars'].map(t => (
               <button key={t} onClick={() => setTab(t)}
-                className={`flex-1 py-4 text-sm font-semibold capitalize transition-all ${tab === t ? 'bg-orange-50 text-saffron-600 border-b-2 border-saffron-500' : 'text-gray-500 hover:text-gray-700'}`}>
-                {t === 'bookings' ? '📋 Bookings' : '🚘 Cars'}
+                className={`relative flex-1 py-4 text-sm font-semibold capitalize transition-all ${tab === t ? 'bg-orange-50 text-saffron-600 border-b-2 border-saffron-500' : 'text-gray-500 hover:text-gray-700'}`}>
+                {t === 'bookings' ? (
+                  <span className="flex items-center justify-center gap-2">
+                    📋 Bookings
+                    {bookingCount > 0 && (
+                      <span className="inline-flex items-center justify-center w-5 h-5 bg-yellow-400 text-yellow-900 text-xs font-bold rounded-full">
+                        {bookingCount > 9 ? '9+' : bookingCount}
+                      </span>
+                    )}
+                  </span>
+                ) : '🚘 Cars'}
               </button>
             ))}
           </div>
