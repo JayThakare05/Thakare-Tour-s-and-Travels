@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, Trash2, RefreshCw, CheckCircle, XCircle, ChevronDown, Car } from 'lucide-react';
 import axios from 'axios';
 
@@ -401,6 +402,7 @@ function AdminLogin({ onSuccess }) {
 
 // ── Main AdminPanel with login gate ──────────────────────────────────────────
 export default function AdminPanel() {
+  const navigate = useNavigate();
   const [authenticated, setAuthenticated] = useState(
     () => sessionStorage.getItem('adminAuth') === 'true'
   );
@@ -410,6 +412,7 @@ export default function AdminPanel() {
   const handleLogout = () => {
     sessionStorage.removeItem('adminAuth');
     setAuthenticated(false);
+    navigate('/');
   };
 
   useEffect(() => {
@@ -431,12 +434,20 @@ export default function AdminPanel() {
             <h1 className="text-3xl font-bold">⚙️ Admin Dashboard</h1>
             <p className="text-gray-400 mt-1">Thakare Tours and Travels — Management Panel</p>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all"
-          >
-            🔒 Logout
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all"
+            >
+              ← Back to Site
+            </button>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all"
+            >
+              🔒 Logout
+            </button>
+          </div>
         </div>
       </div>
 

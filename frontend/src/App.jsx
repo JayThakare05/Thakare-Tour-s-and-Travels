@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { BrowserRouter, Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { LanguageProvider } from './context/LanguageContext';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -11,17 +12,10 @@ import AdminPanel from './components/AdminPanel';
 import Footer from './components/Footer';
 import StickyButtons from './components/StickyButtons';
 
-function AppContent() {
-  const isAdminUrl = new URLSearchParams(window.location.search).get('admin') === '1';
-  const [page, setPage] = useState(isAdminUrl ? 'admin' : 'home');
+// ── Main site pages (home / book / cars / contact) ───────────────────────────
+function MainSite() {
+  const [page, setPage] = useState('home');
   const [preselectedCar, setPreselectedCar] = useState('');
-
-  // Keep URL clean after admin is loaded
-  useEffect(() => {
-    if (isAdminUrl) {
-      window.history.replaceState({}, '', window.location.pathname);
-    }
-  }, []);
 
   const handleBookCar = (car) => {
     setPreselectedCar(car.name);
@@ -31,8 +25,6 @@ function AppContent() {
 
   const renderPage = () => {
     switch (page) {
-      case 'admin':
-        return <AdminPanel />;
       case 'book':
         return (
           <>
@@ -67,34 +59,38 @@ function AppContent() {
     }
   };
 
-  const isAdmin = page === 'admin';
-
   return (
     <div className="min-h-screen">
-      {!isAdmin && <Navbar currentPage={page} setPage={setPage} />}
-      {isAdmin && (
-        <div className="fixed top-0 left-0 right-0 z-50 bg-gray-900 h-16 flex items-center px-6 justify-between">
-          <span className="text-white font-bold">🔧 Admin Mode</span>
-          <button onClick={() => setPage('home')} className="text-gray-400 hover:text-white text-sm transition-colors">
-            ← Back to Site
-          </button>
-        </div>
-      )}
-
-      <main>
-        {renderPage()}
-      </main>
-
-      {!isAdmin && <Footer setPage={setPage} />}
+      <Navbar currentPage={page} setPage={setPage} />
+      <main>{renderPage()}</main>
+      <Footer setPage={setPage} />
       <StickyButtons />
     </div>
   );
 }
 
+// ── Protected Admin Route ─────────────────────────────────────────────────────
+function AdminRoute() {
+  return (
+    <div className="min-h-screen">
+      <AdminPanel />
+      <StickyButtons />
+    </div>
+  );
+}
+
+// ── Root App with Router ──────────────────────────────────────────────────────
 export default function App() {
   return (
-    <LanguageProvider>
-      <AppContent />
-    </LanguageProvider>
+    <BrowserRouter>
+      <LanguageProvider>
+        <Routes>
+          <Route path="/" element={<MainSite />} />
+          <Route path="/admin" element={<AdminRoute />} />
+          {/* Redirect any unknown paths to home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </LanguageProvider>
+    </BrowserRouter>
   );
 }
