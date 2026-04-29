@@ -202,21 +202,164 @@ function CarsTab() {
   );
 }
 
+// ── Admin Login Gate ─────────────────────────────────────────────────────────
+function AdminLogin({ onSuccess }) {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError]       = useState('');
+  const [loading, setLoading]   = useState(false);
+  const [shake, setShake]       = useState(false);
+  const [showPass, setShowPass] = useState(false);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      const res = await axios.post(`${API}/admin/login`, { username, password });
+      if (res.data.success) {
+        sessionStorage.setItem('adminAuth', 'true');
+        onSuccess();
+      }
+    } catch {
+      setError('Invalid username or password. Please try again.');
+      setShake(true);
+      setTimeout(() => setShake(false), 600);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center px-4">
+      {/* Decorative glow */}
+      <div className="absolute w-96 h-96 bg-orange-500 opacity-10 rounded-full blur-3xl pointer-events-none" style={{ top: '15%', left: '30%' }} />
+
+      <div
+        className={`relative w-full max-w-md bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl transition-all ${shake ? 'animate-[shake_0.4s_ease]' : ''}`}
+        style={shake ? { animation: 'shake 0.4s ease' } : {}}
+      >
+        {/* Logo / Brand */}
+        <div className="flex flex-col items-center mb-8">
+          <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-400 rounded-2xl flex items-center justify-center shadow-lg mb-4">
+            <span className="text-3xl">🔐</span>
+          </div>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Admin Portal</h1>
+          <p className="text-gray-400 text-sm mt-1">Thakare Tours and Travels</p>
+        </div>
+
+        <form onSubmit={handleLogin} className="space-y-5">
+          {/* Username */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-300 mb-1.5">Username</label>
+            <input
+              id="admin-username"
+              type="text"
+              autoComplete="username"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              required
+              placeholder="Enter admin username"
+              className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 transition-all"
+            />
+          </div>
+
+          {/* Password */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-300 mb-1.5">Password</label>
+            <div className="relative">
+              <input
+                id="admin-password"
+                type={showPass ? 'text' : 'password'}
+                autoComplete="current-password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+                placeholder="Enter password"
+                className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 pr-12 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 transition-all"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPass(p => !p)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors text-lg"
+              >
+                {showPass ? '🙈' : '👁️'}
+              </button>
+            </div>
+          </div>
+
+          {/* Error */}
+          {error && (
+            <div className="bg-red-500/20 border border-red-500/40 rounded-xl px-4 py-3 text-red-300 text-sm flex items-center gap-2">
+              <span>⚠️</span> {error}
+            </div>
+          )}
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-orange-500 to-orange-400 hover:from-orange-400 hover:to-orange-300 text-white font-bold py-3 rounded-xl transition-all shadow-lg hover:shadow-orange-500/30 hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100"
+          >
+            {loading ? '⏳ Verifying...' : '🔓 Login to Admin'}
+          </button>
+        </form>
+
+        <p className="text-center text-gray-600 text-xs mt-6">Authorised access only</p>
+      </div>
+
+      {/* Shake keyframe */}
+      <style>{`
+        @keyframes shake {
+          0%,100%{transform:translateX(0)}
+          20%{transform:translateX(-8px)}
+          40%{transform:translateX(8px)}
+          60%{transform:translateX(-6px)}
+          80%{transform:translateX(6px)}
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// ── Main AdminPanel with login gate ──────────────────────────────────────────
 export default function AdminPanel() {
+  const [authenticated, setAuthenticated] = useState(
+    () => sessionStorage.getItem('adminAuth') === 'true'
+  );
   const [tab, setTab] = useState('bookings');
   const [bookingCount, setBookingCount] = useState(0);
 
+  const handleLogout = () => {
+    sessionStorage.removeItem('adminAuth');
+    setAuthenticated(false);
+  };
+
   useEffect(() => {
-    axios.get(`${API}/bookings?status=pending`).then(r => setBookingCount(r.data.total || 0)).catch(() => {});
-  }, []);
+    if (authenticated) {
+      axios.get(`${API}/bookings?status=pending`).then(r => setBookingCount(r.data.total || 0)).catch(() => {});
+    }
+  }, [authenticated]);
+
+  if (!authenticated) {
+    return <AdminLogin onSuccess={() => setAuthenticated(true)} />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pt-16">
       {/* Admin Header */}
       <div className="bg-gradient-to-r from-gray-900 to-gray-800 text-white py-10 px-4">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-bold">⚙️ Admin Dashboard</h1>
-          <p className="text-gray-400 mt-1">Thakare Tours and Travels — Management Panel</p>
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">⚙️ Admin Dashboard</h1>
+            <p className="text-gray-400 mt-1">Thakare Tours and Travels — Management Panel</p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all"
+          >
+            🔒 Logout
+          </button>
         </div>
       </div>
 
@@ -261,3 +404,4 @@ export default function AdminPanel() {
     </div>
   );
 }
+

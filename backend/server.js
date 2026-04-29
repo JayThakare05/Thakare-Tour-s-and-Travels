@@ -14,10 +14,26 @@ app.use(express.json());
 app.use('/api/cars', require('./routes/cars'));
 app.use('/api/bookings', require('./routes/bookings'));
 
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Thakare Tours API running' });
+// Admin login
+app.post('/api/admin/login', (req, res) => {
+  const { username, password } = req.body;
+  if (username === 'admin121' && password === process.env.ADMIN_PASSWORD) {
+    return res.json({ success: true, token: 'admin-authenticated' });
+  }
+  return res.status(401).json({ success: false, message: 'Invalid credentials' });
 });
+
+// Root route — backend live status
+app.get('/', (req, res) => {
+  res.send("Server running ");
+});
+
+// Health check (JSON)
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', message: 'Thakare Tours API running', timestamp: new Date().toISOString() });
+});
+
+
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_ATLAS_URI)
