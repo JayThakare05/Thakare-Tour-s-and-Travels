@@ -16,9 +16,22 @@ app.use('/api/bookings', require('./routes/bookings'));
 app.use('/api/upload', require('./routes/upload'));
 
 // Admin login
+let adminCredentials;
+try {
+  adminCredentials = require('./data/admin.json');
+} catch (e) {
+  adminCredentials = {
+    username: 'thakaren285@gmail.com',
+    password: process.env.ADMIN_PASSWORD || '123456'
+  };
+}
+
 app.post('/api/admin/login', (req, res) => {
   const { username, password } = req.body;
-  if (username === 'admin121' && password === process.env.ADMIN_PASSWORD) {
+  const validUsername = adminCredentials.username;
+  const validPassword = process.env.ADMIN_PASSWORD || adminCredentials.password;
+
+  if (username === validUsername && password === validPassword) {
     return res.json({ success: true, token: 'admin-authenticated' });
   }
   return res.status(401).json({ success: false, message: 'Invalid credentials' });
